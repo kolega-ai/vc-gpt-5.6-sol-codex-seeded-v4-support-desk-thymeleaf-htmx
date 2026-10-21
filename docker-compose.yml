@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: supportdesk
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-local-support-password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support -d supportdesk"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: [support-db:/var/lib/postgresql/data]
+  decision:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: decision } }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/supportdesk
+      DB_USER: support
+      DB_PASSWORD: ${DB_PASSWORD:-local-support-password}
+      TOKEN_SECRET: ${TOKEN_SECRET:-local-development-signing-key-change-me-32}
+      FILE_ROOT: /data/uploads
+      CORE_URL: http://core-mock:8082
+    depends_on: { postgres: { condition: service_healthy } }
+    volumes: [support-files:/data/uploads]
+  core-mock:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: core-mock } }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/supportdesk
+      DB_USER: support
+      DB_PASSWORD: ${DB_PASSWORD:-local-support-password}
+      SCOPE_SECRET: ${SCOPE_SECRET:-local-development-core-key-change-me-32}
+    depends_on: { postgres: { condition: service_healthy } }
+  channel:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: channel } }
+    ports: ["8080:8080"]
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/supportdesk
+      DB_USER: support
+      DB_PASSWORD: ${DB_PASSWORD:-local-support-password}
+      TOKEN_SECRET: ${TOKEN_SECRET:-local-development-signing-key-change-me-32}
+      DECISION_URL: http://decision:8081
+    depends_on: [decision]
+volumes:
+  support-db:
+  support-files:

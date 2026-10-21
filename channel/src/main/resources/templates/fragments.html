@@ -1,0 +1,26 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><body>
+<head th:fragment="head(title)">
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}">
+ <title th:text="${title} + ' · Northstar Support'">Northstar Support</title>
+ <link rel="stylesheet" th:href="@{/css/app.css(v=${assetVersion})}">
+ <script defer th:src="@{/webjars/htmx.org/2.0.6/dist/htmx.min.js}"></script><script defer th:src="@{/js/app.js(v=${assetVersion})}"></script>
+</head>
+<aside th:fragment="sidebar" class="sidebar">
+ <a class="brand" href="/dashboard"><span class="brand-mark">N</span><span>Northstar<small>Support desk</small></span></a>
+ <nav aria-label="Main navigation">
+  <a href="/dashboard"><span>⌂</span>Overview</a>
+  <a href="/tickets"><span>▤</span><span th:text="${isCustomer}?'My organisation':'Ticket queue'">Tickets</span></a>
+  <a href="/knowledge"><span>◇</span>Knowledge</a>
+  <a th:if="${isLead}" href="/escalations"><span>↗</span>Escalations</a>
+  <div th:if="${isAdmin}" class="nav-label">Administration</div>
+  <a th:if="${isAdmin}" href="/admin"><span>◎</span>People &amp; teams</a>
+  <a th:if="${isAdmin}" href="/admin/settings"><span>⚙</span>Desk settings</a>
+  <a th:if="${isAdmin}" href="/admin/import-export"><span>⇄</span>Data exchange</a>
+  <a th:if="${isAdmin}" href="/admin/audit"><span>⌁</span>Audit trail</a>
+ </nav>
+ <div class="sidebar-foot"><a href="/profile"><span class="avatar" th:text="${#strings.substring(viewer.displayName,0,1)}">A</span><span><strong th:text="${viewer.displayName}">Name</strong><small th:text="${#strings.replace(viewer.roleHint,'_',' ')}">Role</small></span></a><form method="post" action="/logout"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="icon-btn" aria-label="Sign out" title="Sign out">↪</button></form></div>
+</aside>
+<header th:fragment="topbar(title,eyebrow)" class="topbar"><div><p class="eyebrow" th:text="${eyebrow}">Workspace</p><h1 th:text="${title}">Page</h1></div><div class="top-actions"><span class="status-dot"><i></i>All systems operational</span><a class="btn btn-quiet" href="/profile">Profile</a></div></header>
+<div th:fragment="flash" class="flash-stack"><div th:if="${success}" class="alert success" role="status"><span>✓</span><span th:text="${success}"></span></div><div th:if="${error}" class="alert danger" role="alert"><span>!</span><span th:text="${error}"></span></div></div>
+</body></html>

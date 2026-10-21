@@ -1,0 +1,4 @@
+CREATE TABLE auth_outbox (
+ id BIGSERIAL PRIMARY KEY, recipient VARCHAR(200) NOT NULL, subject VARCHAR(200) NOT NULL,
+ body TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
